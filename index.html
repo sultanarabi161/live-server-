@@ -1,40 +1,498 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funtime - Live Streaming</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Cracker Tools Web</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .dark-mode {
+            background-color: #333;
+            color: #fff;
+        }
+        .dark-mode header,
+        .dark-mode footer,
+        .dark-mode .tool-item {
+            background-color: #444;
+            color: #fff;
+        }
+        header {
+            background-color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2196F3;
+        }
+        .menu-icon, .search-icon {
+            cursor: pointer;
+        }
+        .banner {
+            background-color: #2196F3;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+        .banner button {
+            background-color: white;
+            color: #2196F3;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .search-container {
+            margin: 20px;
+        }
+        .search-box {
+            display: flex;
+            background-color: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .search-box input {
+            flex-grow: 1;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+        }
+        .search-box button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        footer {
+            background-color: white;
+            padding: 20px;
+            text-align: left;
+            margin-top: 20px;
+        }
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .footer-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .footer-text {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .footer-links h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .footer-links ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .footer-links ul li {
+            margin-bottom: 5px;
+        }
+        .footer-links ul li a {
+            color: #666;
+            text-decoration: none;
+        }
+        .social-media {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .social-icons a {
+            color: #666;
+            text-decoration: none;
+        }
+        .social-icons svg {
+            width: 24px;
+            height: 24px;
+            transition: color 0.3s;
+        }
+        .social-icons a:hover svg {
+            color: #2196F3;
+        }
+        .copyright {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+        .menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: white;
+            transition: right 0.3s ease-in-out;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .menu.open {
+            right: 0;
+        }
+        .menu ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .menu ul li {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .menu ul li a {
+            text-decoration: none;
+            color: #333;
+        }
+        .close-menu {
+            position: sticky;
+            top: 10px;
+            text-align: right;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .menu-section {
+            margin-bottom: 20px;
+        }
+        .menu-section h3 {
+            padding: 0 20px;
+            color: #2196F3;
+        }
+        .theme-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .theme-toggle span {
+            font-size: 16px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+        }
+        .back-to-top:hover {
+            background-color: #1e88e5;
+        }
+        /* Sign In Button */
+        .sign-in-button {
+            margin: 15px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            display: block; /* Ensure it is displayed */
+            width: calc(100% - 40px); /* Full width minus margins */
+            text-align: center; /* Center the text */
+        }
+        .sign-in-button:hover {
+            background-color: #45a049;
+        }
+        /* Tool Cards */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .tool-item {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .tool-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .tool-icon {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Funtime - Live Streaming</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Movies</a></li>
-                <li><a href="#">Live TV</a></li>
-            </ul>
-        </nav>
-    </header>
+<header>
+    <div class="logo">Cracker Tools Web</div>
+    <div>
+        <span class="search-icon" onclick="toggleSearch()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+        </span>
+        <span class="menu-icon" onclick="toggleMenu()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </span>
+    </div>
+</header>
+<div class="banner">
+    <span>Want To Remove Ads & Captcha?</span>
+    <button>Support Us</button>
+</div>
+<div class="search-container" id="search-container" style="display: none;">
+    <div class="search-box">
+        <input type="text" placeholder="Search Tools">
+        <button>Search</button>
+    </div>
+</div>
+
+<!-- Tools Cards Section -->
+<div class="tools-grid">
+    <a href="essay-writer.html" class="tool-item">
+        <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2196F3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <p>Essay Writer</p>
+    </a>
     
-    <main>
-        <section id="live-tv">
-            <h2>Watch Live TV</h2>
-            <video id="video" controls>
-                <source src="" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-            <div id="channels">
-                <!-- Channels will be loaded here by JavaScript -->
+    <a href="live-streaming.html" class="tool-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="60px" height="60px" fill="#000000">
+            <path d="M56,12H8c-3.313,0-6,2.687-6,6v27c0,3.313,2.687,6,6,6h16l-3.293,3.293C20.512,54.488,20.256,55.244,20.512,55.707 C20.768,56.171,21.256,56.5,21.793,56.5h20.414c0.537,0,1.025-0.329,1.281-0.793c0.256-0.463,0-1.219-0.707-1.707L40,51h16 c3.313,0,6-2.687,6-6V18C62,14.687,59.313,12,56,12z M58,45c0,1.104-0.896,2-2,2H8c-1.104,0-2-0.896-2-2V18c0-1.104,0.896-2,2-2 h48c1.104,0,2,0.896,2,2V45z"></path>
+        </svg>
+        <p>Live Streaming online</p>
+    </a>
+    
+    <a href="ask-ai.html" class="tool-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64px" height="64px" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="12" y="18" width="40" height="34" rx="5" ry="5"></rect>
+            <circle cx="24" cy="30" r="4"></circle>
+            <circle cx="40" cy="30" r="4"></circle>
+            <line x1="32" y1="2" x2="32" y2="10"></line>
+            <line x1="8" y1="28" x2="2" y2="28"></line>
+            <line x1="8" y1="36" x2="2" y2="36"></line>
+            <line x1="56" y1="28" x2="62" y2="28"></line>
+            <line x1="56" y1="36" x2="62" y2="36"></line>
+            <path d="M22,46 a10,10 0 0,1 20,0"></path>
+        </svg>
+        <p>Ask Ai</p>
+    </a>
+    
+    <!-- Add other tool items similarly -->
+</div>
+
+<div class="menu" id="menu">
+    <div class="close-menu" onclick="toggleMenu()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+    </div>
+    <div class="menu-section">
+        <h3>Navigate</h3>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="sultanarabi.netlifuly.app">Contact</a></li>
+        </ul>
+    </div>
+    <div class="menu-section">
+        <h3>Services</h3>
+        <ul>
+            <li><a href="tools.html">Tools page</a></li>
+            <li><a href="all.projects">All projects</a></li>
+            <li><a href="ai.html">AI Image Generator</a></li>
+        </ul>
+    </div>
+    <div class="theme-toggle">
+        <span>Dark Mode</span>
+        <label class="switch">
+            <input type="checkbox" onchange="toggleTheme()">
+            <span class="slider"></span>
+        </label>
+    </div>
+    <button class="sign-in-button">Sign In</button>
+</div>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-logo">
+            <div class="logo">Cracker Tools Web</div>
+        </div>
+        <div class="footer-text">
+            <p>Explore a wide range of tools designed to enhance your productivity. Whether you need to write essays, improve content, generate images, edit PDFs, or remove backgrounds, Cracker Tools Web has got you covered.</p>
+        </div>
+        <div class="footer-links">
+            <div>
+                <h3>About Us</h3>
+                <ul>
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
             </div>
-        </section>
-    </main>
+            <div>
+                <h3>Help</h3>
+                <ul>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="social-media">
+        <h3>Follow Us</h3>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4v10H14V12h-2v-3c0-1.1.9-2 2-2h2V0h-4c-3.3 0-6 2.7-6 6v3H0v4h4v10h4V12h4z"></path>
+                </svg>
+            </a>
+            <a href="#" aria-label="Twitter">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 3c-1 0-2 .4-2.8 1.1A4.9 4.9 0 0 0 21 1a9.9 9.9 0 0 1-3.1 1.2A4.9 4.9 0 0 0 16 0c-2.7 0-4.9 2.2-4.9 4.9 0 .4 0 .8.1 1.1A14 14 0 0 1 1 2.7a4.9 4.9 0 0 0 1.5 6.5c-.5 0-1-.1-1.4-.4v0c0 2.2 1.6 4.1 3.7 4.5-.4.1-.8.1-1.2.1-.3 0-.7 0-1 0 .6 1.9 2.4 3.3 4.5 3.4-1.6 1.2-3.6 1.9-5.8 1.9-.4 0-.8 0-1.2-.1 2 1.3 4.4 2 6.9 2 8.3 0 12.9-6.9 12.9-12.9 0-.2 0-.5 0-.7A9.2 9.2 0 0 0 23 3z"></path>
+                </svg>
+            </a>
+            <a href="#" aria-label="Instagram">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+                </svg>
+            </a>
+            <a href="#" aria-label="LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 8a6 6 0 1 0-12 0 6 6 0 0 0 12 0z"></path>
+                    <path d="M2 24h4V9H2z"></path>
+                    <path d="M22 24h-4v-9h4z"></path>
+                    <path d="M18 9v1a4 4 0 1 1-8 0V9"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+    <div class="copyright">
+        &copy; 2024 Cracker Tools Web. All rights reserved.
+    </div>
+</footer>
 
-    <footer>
-        <p>&copy; 2024 Funtime. All rights reserved.</p>
-    </footer>
+<button class="back-to-top" onclick="scrollToTop()">↑</button>
 
-    <script src="js/script.js"></script>
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById('menu');
+        menu.classList.toggle('open');
+    }
+
+    function toggleSearch() {
+        const searchContainer = document.getElementById('search-container');
+        searchContainer.style.display = searchContainer.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    // Back to Top Functionality
+    const backToTopButton = document.querySelector('.back-to-top');
+
+    window.onscroll = function() {
+        if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+            backToTopButton.style.display = "block";
+        } else {
+            backToTopButton.style.display = "none";
+        }
+    };
+
+    function scrollToTop() {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+</script>
 </body>
 </html>
