@@ -5,7 +5,7 @@ $channels = [
     [
         "id" => 1,
         "name" => "Channel One",
-        "stream_url" => "http://example.com/stream/channel1"
+        "stream_url" => "https://cdn2.pishow.tv/live/270/master.m3u8"
     ],
     [
         "id" => 2,
