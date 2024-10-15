@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,7 +39,7 @@
             
             <div class="flex space-x-2 mb-4">
                 <button onclick="saveNote()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save Note</button>
-                <button onclick="window.open('https://www.dropbox.com/scl/fo/4zfbacff21gh4j3sxt6lf/ADQX-aKb_hSW07tL7u7hAxE?rlkey=s1nt2pqvy2gpqmfihqxkc3obn&st=rgbjdd5c&dl=0', '_blank'); loadNotes();" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Load Notes</button>
+                <button onclick="window.open('https://www.dropbox.com/scl/fo/4zfbacff21gh4j3sxt6lf/ADQX-aKb_hSW07tL7u7hAxE?rlkey=s1nt2pqvy2gpqmfihqxkc3obn&st=rgbjdd5c&dl=0', '_blank');" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Load Notes</button>
                 <button onclick="togglePreview()" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Toggle Preview</button>
                 <button onclick="createFolder()" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Create Folder</button>
             </div>
@@ -57,7 +58,8 @@
     </div>
 
     <script>
-        const ACCESS_TOKEN = 'sl.B-vZHd7dsfYVPcsYHZzJaNVhkR5eUoIYH2v7VyoQg5ZjGxryDlAIvKLnaKXuiAUKEie7ajxlOmdsAujthmvJAw5LP-g7CQ1N2Qj9pgMrwboj6fmD9_Q0IcObLzdp-SHfwPkRQwITP5bMP2Ix8Sm1Nyk';
+        // TODO: Replace with your actual access token
+        const ACCESS_TOKEN = 'sl.B-wqDmHOBY-XAw0jyFMhcKeVZzAmR5AuDa8Ucp5NfQdQH2s-w_t3fZEFBsbsn9bzXCeo4gpNqirkkfY5ZD4UPIMg2wmhhd0kMV7f_cn4uNa9iuOoxLTCG1F2XpoxD8xnEZjt4Wq1eeh2kDskVwCgCkA';
         const dbx = new Dropbox.Dropbox({ accessToken: ACCESS_TOKEN });
         const folderPath = '/enhanced_notes/';
         let editor;
@@ -68,9 +70,27 @@
                 lineNumbers: true,
                 theme: 'default'
             });
-            loadNotes();
-            loadFolderStructure();
+
+            // Check if the base folder exists, if not create it
+            checkAndCreateBaseFolder();
         });
+
+        function checkAndCreateBaseFolder() {
+            dbx.filesListFolder({ path: '' })
+                .then(response => {
+                    const folderExists = response.entries.some(entry => entry.name === 'enhanced_notes' && entry['.tag'] === 'folder');
+                    if (!folderExists) {
+                        return dbx.filesCreateFolderV2({ path: folderPath });
+                    }
+                })
+                .then(() => {
+                    console.log("Base folder checked/created successfully");
+                })
+                .catch(error => {
+                    console.error("Error checking/creating base folder:", error);
+                    handleError(error);
+                });
+        }
 
         function saveNote() {
             const fileName = document.getElementById('fileName').value.trim() || `note_${new Date().toISOString().replace(/[:.]/g, '-')}`;
@@ -82,89 +102,11 @@
                 .then(response => {
                     console.log("Note saved to Dropbox:", response);
                     alert("Note saved successfully!");
-                    loadNotes();
                 })
                 .catch(error => {
                     console.error("Error saving note:", error);
-                    alert("Failed to save note. Please check the console for more details.");
+                    handleError(error);
                 });
-        }
-
-        function loadNotes() {
-            dbx.filesListFolder({ path: folderPath })
-                .then(response => {
-                    const files = response.entries;
-                    const fileListDiv = document.getElementById('fileList');
-                    fileListDiv.innerHTML = '<h3 class="font-bold mb-2">Files:</h3>';
-
-                    files.forEach(file => {
-                        if (file['.tag'] === 'file') {
-                            const fileDiv = document.createElement('div');
-                            fileDiv.className = 'flex justify-between items-center mb-2';
-
-                            // Create a temporary link for each file
-                            dbx.filesGetTemporaryLink({ path: file.path_lower })
-                                .then(linkResponse => {
-                                    const fileLink = document.createElement('a');
-                                    fileLink.href = linkResponse.link;
-                                    fileLink.target = '_blank'; // Opens in a new tab
-                                    fileLink.textContent = file.name;
-                                    fileLink.className = 'text-blue-500 hover:underline';
-
-                                    const deleteButton = document.createElement('button');
-                                    deleteButton.textContent = 'Delete';
-                                    deleteButton.className = 'bg-red-500 text-white px-2 py-1 rounded text-sm hover:bg-red-600';
-                                    deleteButton.onclick = () => deleteNote(file.path_lower);
-
-                                    fileDiv.appendChild(fileLink);
-                                    fileDiv.appendChild(deleteButton);
-                                    fileListDiv.appendChild(fileDiv);
-                                })
-                                .catch(error => {
-                                    console.error("Error getting temporary link:", error);
-                                    alert("Failed to generate a link. Please check the console for more details.");
-                                });
-                        }
-                    });
-                })
-                .catch(error => {
-                    console.error("Error loading file list:", error);
-                    alert("Failed to load file list. Please check the console for more details.");
-                });
-        }
-
-        function loadNote(filePath) {
-            dbx.filesDownload({ path: filePath })
-                .then(response => {
-                    const reader = new FileReader();
-                    reader.onload = function() {
-                        editor.setValue(reader.result);
-                        document.getElementById('fileName').value = filePath.split('/').pop().split('.')[0];
-                        document.getElementById('fileFormat').value = filePath.split('.').pop();
-                        console.log("Note loaded from Dropbox:", reader.result);
-                        alert("Note loaded successfully!");
-                    };
-                    reader.readAsText(response.fileBlob);
-                })
-                .catch(error => {
-                    console.error("Error loading note:", error);
-                    alert("Failed to load note. Please check the console for more details.");
-                });
-        }
-
-        function deleteNote(filePath) {
-            if (confirm('Are you sure you want to delete this note?')) {
-                dbx.filesDelete({ path: filePath })
-                    .then(response => {
-                        console.log("Note deleted from Dropbox:", response);
-                        alert("Note deleted successfully!");
-                        loadNotes();
-                    })
-                    .catch(error => {
-                        console.error("Error deleting note:", error);
-                        alert("Failed to delete note. Please check the console for more details.");
-                    });
-            }
         }
 
         function togglePreview() {
@@ -198,63 +140,12 @@
                     .then(response => {
                         console.log("Folder created:", response);
                         alert("Folder created successfully!");
-                        loadFolderStructure();
                     })
                     .catch(error => {
                         console.error("Error creating folder:", error);
-                        alert("Failed to create folder. Please check the console for more details.");
+                        handleError(error);
                     });
             }
-        }
-
-        function loadFolderStructure() {
-            console.log("Loading folder structure from:", folderPath);
-            dbx.filesListFolder({ path: folderPath, recursive: true })
-                .then(response => {
-                    console.log("Folder structure response:", response);
-                    const folderStructure = {};
-                    response.entries.forEach(entry => {
-                        const path = entry.path_display.split('/');
-                        let current = folderStructure;
-                        path.forEach((part, index) => {
-                            if (index > 1) { // Skip the first two parts (/enhanced_notes)
-                                if (!current[part]) {
-                                    current[part] = entry['.tag'] === 'folder' ? {} : null;
-                                }
-                                current = current[part];
-                            }
-                        });
-                    });
-                    renderFolderStructure(folderStructure);
-                })
-                .catch(error => {
-                    console.error("Error loading folder structure:", error);
-                    alert("Failed to load folder structure. Please check the console for more details.");
-                });
-        }
-
-        function renderFolderStructure(structure, path = '') {
-            const folderStructureDiv = document.getElementById('folderStructure');
-            folderStructureDiv.innerHTML = '<h3 class="font-bold mb-2">Folder Structure:</h3>';
-            
-            function renderLevel(obj, level = 0) {
-                const ul = document.createElement('ul');
-                ul.className = 'ml-4';
-                for (const [key, value] of Object.entries(obj)) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-1';
-                    if (value === null) {
-                        li.innerHTML = `<span class="text-blue-500 cursor-pointer" onclick="loadNote('${folderPath}${path}${key}')">${key}</span>`;
-                    } else {
-                        li.innerHTML = `<span class="font-semibold">${key}/</span>`;
-                        li.appendChild(renderLevel(value, level + 1));
-                    }
-                    ul.appendChild(li);
-                }
-                return ul;
-            }
-            
-            folderStructureDiv.appendChild(renderLevel(structure));
         }
 
         function searchNotes() {
@@ -283,8 +174,26 @@
                 })
                 .catch(error => {
                     console.error("Error searching notes:", error);
-                    alert("Failed to search notes. Please check the console for more details.");
+                    handleError(error);
                 });
+        }
+
+        function handleError(error) {
+            let errorMessage = "An error occurred. ";
+
+            if (error.status === 401) {
+                errorMessage += "Your access token may be invalid or expired. Please check and update your Dropbox access token.";
+            } else if (error.status === 403) {
+                errorMessage += "You don't have permission to perform this action. Please check your Dropbox app permissions.";
+            } else if (error.status === 404) {
+                errorMessage += "The file or folder was not found. It may have been moved or deleted.";
+            } else if (error.status === 409) {
+                errorMessage += "There was a conflict with the current state. The folder might already exist.";
+            } else {
+                errorMessage += "Please try again later or contact support if the problem persists.";
+            }
+
+            alert(errorMessage);
         }
     </script>
 </body>
