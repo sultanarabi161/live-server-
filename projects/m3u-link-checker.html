@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cracker IPTV</title>
     <style>
-        body {
+        /* Previous CSS styles remain unchanged */
+
+
+body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
@@ -140,6 +143,9 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
         }
+
+
+
     </style>
 </head>
 <body>
@@ -161,7 +167,8 @@
             <input type="text" id="m3u-input" placeholder="Enter m3u link">
             <button onclick="addM3ULink()">Add</button>
         </div>
-        <div id="m3u-container"></div>
+        <div id="default-m3u-container"></div>
+        <div id="custom-m3u-container"></div>
     </main>
     <footer>
         <p>© 2024 Cracker IPTV. All rights reserved.</p>
@@ -179,6 +186,10 @@
 
     <script>
         let playlistCount = 1;
+        const DEFAULT_PLAYLISTS = [
+            {name: 'Default Pro Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/sultan-m3u-playlist/refs/heads/main/sultan-playlist.m3u', isDefault: true},
+            {name: 'Default Stand Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/new-iptv-playlist/refs/heads/main/newiptv.m3u', isDefault: true}
+        ];
 
         function toggleM3UInput() {
             const m3uInputBox = document.querySelector('.m3u-input-box');
@@ -191,7 +202,8 @@
                     const linkData = {
                         name: `Playlist ${playlistCount}`,
                         description: `Click for streaming channels`,
-                        url: m3uLink
+                        url: m3uLink,
+                        isDefault: false
                     };
                     playlistCount++;
                     resolve(linkData);
@@ -217,7 +229,7 @@
         }
 
         function createCard(linkData) {
-            const m3uContainer = document.getElementById('m3u-container');
+            const container = linkData.isDefault ? document.getElementById('default-m3u-container') : document.getElementById('custom-m3u-container');
             const m3uCard = document.createElement('div');
             m3uCard.className = 'm3u-display';
 
@@ -229,26 +241,35 @@
             m3uDescription.className = 'm3u-description';
             m3uDescription.textContent = linkData.description;
 
-            const editButton = document.createElement('button');
-            editButton.className = 'button edit-button';
-            editButton.textContent = 'Edit';
-            editButton.onclick = () => editLink(linkData, m3uName, m3uCard);
-
-            const deleteButton = document.createElement('button');
-            deleteButton.className = 'button delete-button';
-            deleteButton.textContent = 'Delete';
-            deleteButton.onclick = () => deleteLink(m3uCard, linkData);
-
             m3uCard.appendChild(m3uName);
             m3uCard.appendChild(m3uDescription);
-            m3uCard.appendChild(editButton);
-            m3uCard.appendChild(deleteButton);
+
+            if (!linkData.isDefault) {
+                const editButton = document.createElement('button');
+                editButton.className = 'button edit-button';
+                editButton.textContent = 'Edit';
+                editButton.onclick = (e) => {
+                    e.stopPropagation();
+                    editLink(linkData, m3uName, m3uCard);
+                };
+
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'button delete-button';
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteLink(m3uCard, linkData);
+                };
+
+                m3uCard.appendChild(editButton);
+                m3uCard.appendChild(deleteButton);
+            }
 
             m3uCard.onclick = () => {
                 window.location.href = `video.html?m3u=${encodeURIComponent(linkData.url)}`;
             };
 
-            m3uContainer.appendChild(m3uCard);
+            container.appendChild(m3uCard);
         }
 
         function editLink(linkData, m3uName, m3uCard) {
@@ -281,9 +302,8 @@
         }
 
         window.onload = function() {
+            DEFAULT_PLAYLISTS.forEach(playlist => createCard(playlist));
             loadSavedLinks();
-            createCard({name: 'Default Pro Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/sultan-m3u-playlist/refs/heads/main/sultan-playlist.m3u'});
-            createCard({name: 'Default Stand Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/new-iptv-playlist/refs/heads/main/newiptv.m3u'});
         };
 
         function showClearCachePopup() {
@@ -297,16 +317,11 @@
         }
 
         function clearCache() {
-            const defaultChannels = [
-                {name: 'Default Channel 1', description: 'Click for streaming channels', url: 'https://example.com/video1.mp4'},
-                {name: 'Default Channel 2', description: 'Click for streaming channels', url: 'https://example.com/video2.mp4'}
-            ];
-            localStorage.setItem('m3uLinks', JSON.stringify(defaultChannels));
-            alert('Cache cleared successfully! Only default channels are retained.');
+            localStorage.setItem('m3uLinks', JSON.stringify([]));
+            alert('Cache cleared successfully! Custom playlists have been removed.');
             hideClearCachePopup();
             location.reload();
         }
     </script>
 </body>
 </html>
-
