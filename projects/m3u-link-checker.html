@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +11,7 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            min-height: 100vh; /* Full height for body */
+            min-height: 100vh;
         }
 
         header {
@@ -38,7 +37,7 @@
 
         main {
             padding: 20px;
-            flex: 1; /* Allow main to grow and fill space */
+            flex: 1;
         }
 
         .search-box,
@@ -59,7 +58,7 @@
         }
 
         .m3u-input-box {
-            display: none; /* Initially hidden */
+            display: none;
         }
 
         footer {
@@ -67,8 +66,8 @@
             text-align: center;
             padding: 10px 0;
             width: 100%;
-            position: relative; /* Keep footer in normal flow */
-            margin-top: auto; /* Push footer to the bottom of the content */
+            position: relative;
+            margin-top: auto;
         }
 
         .m3u-display {
@@ -83,7 +82,7 @@
             color: #333;
             transition: transform 0.3s, box-shadow 0.3s;
             margin-bottom: 15px;
-            cursor: pointer; /* Indicate clickable */
+            cursor: pointer;
         }
 
         .m3u-display:hover {
@@ -118,19 +117,18 @@
         .delete-button {
             background-color: #dc3545;
             color: white;
-            margin-left: 10px; /* Space between buttons */
+            margin-left: 10px;
         }
 
-        /* Popup style */
         .popup {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
             z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
         }
@@ -146,10 +144,9 @@
 </head>
 <body>
     <header>
-        <img src="https://i.ibb.co/mq5pTPn/1000009338.jpg" alt="Logo" class="logo" style="height: 40px;"> <!-- Logo URL -->
+        <img src="https://i.ibb.co/mq5pTPn/1000009338.jpg" alt="Logo" class="logo" style="height: 40px;">
         <div class="site-name">Cracker IPTV</div>
         <div class="icon" onclick="toggleM3UInput()">
-            <!-- SVG for + icon -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -171,7 +168,6 @@
         <button onclick="showClearCachePopup()">Clear Cache</button>
     </footer>
 
-    <!-- Popup for Clear Cache Confirmation -->
     <div class="popup" id="clearCachePopup">
         <div class="popup-content">
             <h3>Clear Cache</h3>
@@ -182,7 +178,7 @@
     </div>
 
     <script>
-        let playlistCount = 1; // Counter for playlist names
+        let playlistCount = 1;
 
         function toggleM3UInput() {
             const m3uInputBox = document.querySelector('.m3u-input-box');
@@ -193,11 +189,11 @@
             return new Promise((resolve) => {
                 setTimeout(() => {
                     const linkData = {
-                        name: `Playlist ${playlistCount}`, // Use current count for playlist name
-                        description: `Click for streaming channels`, // Fixed description
-                        url: m3uLink // Store the link for opening
+                        name: `Playlist ${playlistCount}`,
+                        description: `Click for streaming channels`,
+                        url: m3uLink
                     };
-                    playlistCount++; // Increment the counter for the next playlist
+                    playlistCount++;
                     resolve(linkData);
                 }, 1000);
             });
@@ -208,8 +204,8 @@
             if (m3uInput) {
                 fetchLinkData(m3uInput).then(linkData => {
                     createCard(linkData);
-                    document.getElementById('m3u-input').value = ''; // Clear input field
-                    saveLinkData(linkData); // Save link data to localStorage
+                    document.getElementById('m3u-input').value = '';
+                    saveLinkData(linkData);
                 });
             }
         }
@@ -227,11 +223,11 @@
 
             const m3uName = document.createElement('div');
             m3uName.className = 'm3u-name';
-            m3uName.textContent = linkData.name; // Use the generated playlist name
+            m3uName.textContent = linkData.name;
 
             const m3uDescription = document.createElement('div');
             m3uDescription.className = 'm3u-description';
-            m3uDescription.textContent = linkData.description; // Use the fixed description
+            m3uDescription.textContent = linkData.description;
 
             const editButton = document.createElement('button');
             editButton.className = 'button edit-button';
@@ -248,7 +244,6 @@
             m3uCard.appendChild(editButton);
             m3uCard.appendChild(deleteButton);
 
-            // Click event to navigate to video.html with the channel URL
             m3uCard.onclick = () => {
                 window.location.href = `video.html?m3u=${encodeURIComponent(linkData.url)}`;
             };
@@ -262,59 +257,54 @@
             if (newName && newURL) {
                 linkData.name = newName;
                 linkData.url = newURL;
-                m3uName.textContent = linkData.name; // Update displayed name
-                saveUpdatedLinks(); // Save updated link data to localStorage
+                m3uName.textContent = linkData.name;
+                saveUpdatedLinks();
             }
         }
 
         function deleteLink(m3uCard, linkData) {
-            m3uCard.remove(); // Remove from the DOM
+            m3uCard.remove();
             let savedLinks = JSON.parse(localStorage.getItem('m3uLinks')) || [];
-            savedLinks = savedLinks.filter(link => link.url !== linkData.url); // Filter out the deleted link
-            localStorage.setItem('m3uLinks', JSON.stringify(savedLinks)); // Update localStorage
+            savedLinks = savedLinks.filter(link => link.url !== linkData.url);
+            localStorage.setItem('m3uLinks', JSON.stringify(savedLinks));
         }
 
         function saveUpdatedLinks() {
             let savedLinks = JSON.parse(localStorage.getItem('m3uLinks')) || [];
-            localStorage.setItem('m3uLinks', JSON.stringify(savedLinks)); // Save updated links
+            localStorage.setItem('m3uLinks', JSON.stringify(savedLinks));
         }
 
         function loadSavedLinks() {
             const savedLinks = JSON.parse(localStorage.getItem('m3uLinks')) || [];
             savedLinks.forEach(linkData => createCard(linkData));
-            // Update playlistCount based on existing saved links
-            playlistCount = savedLinks.length + 1; // Increment for the next available playlist number
+            playlistCount = savedLinks.length + 1;
         }
 
-        // Add default cards on page load
         window.onload = function() {
-            loadSavedLinks(); // Load saved links from localStorage
-            createCard({name: 'Default Pro Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/aniketda/iptv2050/main/iptv'});
-            createCard({name: 'Default  Stand Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/new-iptv-playlist/refs/heads/main/newiptv.m3u'});
+            loadSavedLinks();
+            createCard({name: 'Default Pro Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/iptv-for-others-browser/refs/heads/main/all-category.m3u?token=GHSAT0AAAAAACYJ5DNCIBOQV3RIXFDCXWEQZX4C3AA'});
+            createCard({name: 'Default Stand Playlist', description: 'Click for streaming channels', url: 'https://raw.githubusercontent.com/sultanarabi161/new-iptv-playlist/refs/heads/main/newiptv.m3u'});
         };
 
-        // Function to show the clear cache popup
         function showClearCachePopup() {
             const popup = document.getElementById('clearCachePopup');
             popup.style.display = 'flex';
         }
 
-        // Function to hide the clear cache popup
         function hideClearCachePopup() {
             const popup = document.getElementById('clearCachePopup');
             popup.style.display = 'none';
         }
 
-        // Function to clear local storage except for default channels
         function clearCache() {
             const defaultChannels = [
                 {name: 'Default Channel 1', description: 'Click for streaming channels', url: 'https://example.com/video1.mp4'},
                 {name: 'Default Channel 2', description: 'Click for streaming channels', url: 'https://example.com/video2.mp4'}
             ];
-            localStorage.setItem('m3uLinks', JSON.stringify(defaultChannels)); // Keep only default channels
-            alert('Cache cleared successfully! Only default channels are retained.'); // Alert user
-            hideClearCachePopup(); // Close the popup
-            location.reload(); // Reload the page to reflect changes
+            localStorage.setItem('m3uLinks', JSON.stringify(defaultChannels));
+            alert('Cache cleared successfully! Only default channels are retained.');
+            hideClearCachePopup();
+            location.reload();
         }
     </script>
 </body>
