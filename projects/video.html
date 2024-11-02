@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,8 +116,11 @@
 
         .tabs {
             display: flex;
-            gap: 10px;
+            justify-content: space-between; /* Changed to space-between */
             margin-bottom: 15px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
         }
 
         .tab {
@@ -124,12 +129,37 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            min-width: 120px; /* Added fixed width */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
 
         .tab.active {
             background-color: #007bff;
             color: white;
+        }
+
+        .tab i {
+            margin-right: 5px;
+        }
+
+        /* Category styles */
+        .category-section {
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .category-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #007bff;
         }
 
         .channel-container {
@@ -250,7 +280,7 @@
     <div class="tabs-container">
         <div class="tabs">
             <button class="tab active" onclick="showTab('all')">
-                <i class="fas fa-list"></i> All
+                <i class="fas fa-list"></i> All Channels
             </button>
             <button class="tab" onclick="showTab('categories')">
                 <i class="fas fa-tags"></i> Categories
@@ -288,6 +318,7 @@
         const playIcon = document.getElementById('play-icon');
         const volumeIcon = document.getElementById('volume-icon');
         let currentTab = 'all';
+        let allChannels = []; // Store all channels globally
         const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
         
         // Load channels from M3U
@@ -298,8 +329,8 @@
             fetch(m3uLink)
                 .then(response => response.text())
                 .then(data => {
-                    const channels = parseM3U(data);
-                    loadChannels(channels);
+                    allChannels = parseM3U(data); // Store channels globally
+                    loadChannels(allChannels);
                 })
                 .catch(error => console.error('Error fetching the m3u link:', error));
         }
@@ -307,7 +338,6 @@
         function parseM3U(data) {
             const lines = data.split('\n');
             const channels = [];
-            let currentCategory = '';
             
             for (let i = 0; i < lines.length; i++) {
                 if (lines[i].startsWith('#EXTINF:')) {
@@ -336,10 +366,14 @@
             const channelList = document.getElementById('channel-list');
             channelList.innerHTML = '';
 
-            let filteredChannels = channels;
-            if (currentTab === 'favorites') {
-                filteredChannels = channels.filter(channel => favorites.includes(channel.name));
-            } else if (currentTab === 'categories') {
+            if (currentTab === 'all') {
+                channelList.appendChild(createChannelList(channels));
+            } 
+            else if (currentTab === 'favorites') {
+                const favoriteChannels = channels.filter(channel => favorites.includes(channel.name));
+                channelList.appendChild(createChannelList(favoriteChannels));
+            } 
+            else if (currentTab === 'categories') {
                 // Group channels by category
                 const categories = {};
                 channels.forEach(channel => {
@@ -352,14 +386,12 @@
                 // Create category sections
                 Object.entries(categories).forEach(([category, categoryChannels]) => {
                     const categorySection = document.createElement('div');
-                    categorySection.innerHTML = `<h3>${category}</h3>`;
+                    categorySection.className = 'category-section';
+                    categorySection.innerHTML = `<h3 class="category-title">${category}</h3>`;
                     categorySection.appendChild(createChannelList(categoryChannels));
                     channelList.appendChild(categorySection);
                 });
-                return;
             }
-
-            channelList.appendChild(createChannelList(filteredChannels));
         }
 
         function createChannelList(channels) {
@@ -375,9 +407,14 @@
                     </div>
                 `;
 
-                channelItem.querySelector('.favorite-icon').onclick = (event) => {
+                // Favorite button click handler
+                const favoriteIcon = channelItem.querySelector('.favorite-icon');
+                favoriteIcon.onclick = (event) => {
                     event.stopPropagation();
                     toggleFavorite(channel.name);
+                    // Update star icon
+                    const starIcon = favoriteIcon.querySelector('i');
+                    starIcon.className = favorites.includes(channel.name) ? 'fas fa-star' : 'far fa-star';
                 };
 
                 channelItem.onclick = () => {
@@ -445,15 +482,24 @@
                 favorites.splice(index, 1);
             }
             localStorage.setItem('favorites', JSON.stringify(favorites));
-            loadChannels(window.channels); // Reload channels to update UI
+            
+            // Only reload if we're in favorites tab
+            if (currentTab === 'favorites') {
+                loadChannels(allChannels);
+            }
         }
 
         function showTab(tab) {
             currentTab = tab;
+            // Update active tab styling
             document.querySelectorAll('.tab').forEach(t => {
-                t.classList.toggle('active', t.textContent.toLowerCase().includes(tab));
+                t.classList.remove('active');
+                if (t.textContent.toLowerCase().includes(tab)) {
+                    t.classList.add('active');
+                }
             });
-            loadChannels(window.channels);
+            // Load appropriate content
+            loadChannels(allChannels);
         }
 
         function toggleSettings() {
@@ -464,7 +510,7 @@
         function clearFavorites() {
             localStorage.removeItem('favorites');
             favorites.length = 0;
-            loadChannels(window.channels);
+            loadChannels(allChannels);
         }
 
         // Volume control
