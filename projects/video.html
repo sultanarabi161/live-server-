@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,6 +13,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            background-color: #f0f0f0;
         }
 
         header {
@@ -42,22 +44,103 @@
             position: relative;
             width: 98%;
             max-width: 800px;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
         }
 
         video {
-            width: 98%;
+            width: 100%;
             height: auto;
+        }
+
+        .custom-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-wrapper:hover .custom-controls {
+            opacity: 1;
+        }
+
+        .center-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .video-wrapper:hover .center-play {
+            opacity: 1;
+        }
+
+        .control-button {
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+
+        .control-button:hover {
+            color: #007bff;
+        }
+
+        .tabs-container {
+            width: 98%;
+            max-width: 800px;
+            margin: 20px 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            background-color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .tab.active {
+            background-color: #007bff;
+            color: white;
         }
 
         .channel-container {
             width: 98%;
             max-width: 800px;
             overflow-y: auto;
-            max-height: 500px; /* Adjust height as needed */
+            max-height: 500px;
             border: 1px solid #ddd;
             border-radius: 8px;
             padding: 10px;
-            background-color: #f1f1f1;
+            background-color: #fff;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -67,41 +150,44 @@
             display: flex;
             align-items: center;
             padding: 10px;
-            background-color: #ffffff;
+            background-color: #f8f9fa;
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
 
         .channel-item:hover {
-            background-color: #ddd;
+            background-color: #e9ecef;
         }
 
         .channel-logo {
-            width: 50px; /* Adjust logo size */
-            height: 50px; /* Adjust logo size */
+            width: 50px;
+            height: 50px;
             margin-right: 10px;
+            border-radius: 4px;
         }
 
         .channel-name {
             font-size: 16px;
+            flex-grow: 1;
         }
 
         .favorite-icon {
             margin-left: auto;
             cursor: pointer;
+            color: #ffc107;
+            font-size: 18px;
         }
 
-        /* Settings Modal */
         .settings-modal {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
             z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            background-color: rgba(0, 0, 0, 0.5);
             justify-content: center;
             align-items: center;
         }
@@ -111,70 +197,102 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            width: 300px; /* Width of settings modal */
+            width: 300px;
             max-height: 80%;
-            overflow-y: auto; /* Allow scrolling */
+            overflow-y: auto;
         }
 
-        .close-button {
-            cursor: pointer;
-            color: #007bff;
-            float: right;
-        }
-
-        .settings-label {
-            margin-top: 10px;
-            display: block;
+        .volume-slider {
+            width: 100px;
+            margin: 0 10px;
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo"></div>
+        <div class="logo"><i class="fas fa-tv"></i></div>
         <div class="site-name">Cracker IPTV</div>
         <div class="icon" onclick="toggleSettings()">
-            <!-- SVG for Settings icon -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-settings">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15.3c.1-.7.1-1.3.1-2 0-.7 0-1.3-.1-2l2.2-1.7c.2-.1.2-.3.1-.5l-2-3.5c-.1-.2-.3-.2-.5-.1l-2.5 1c-.6-.4-1.2-.8-1.9-1l-.4-2.7c-.1-.2-.3-.2-.5-.2h-4c-.2 0-.4 0-.5.2l-.4 2.7c-.7.2-1.3.6-1.9 1l-2.5-1c-.2-.1-.4 0-.5.1l-2 3.5c-.1.2 0 .4.1.5l2.2 1.7c-.1.7-.1 1.3-.1 2s0 1.3.1 2l-2.2 1.7c-.2.1-.2.3-.1.5l2 3.5c.1.2.3.2.5.1l2.5-1c.6.4 1.2.8 1.9 1l.4 2.7c.1.2.3.2.5.2h4c.2 0 .4 0 .5-.2l.4-2.7c.7-.2 1.3-.6 1.9-1l2.5 1c.2.1.4 0 .5-.1l2-3.5c.1-.2 0-.4-.1-.5l-2.2-1.7z"></path>
-            </svg>
+            <i class="fas fa-cog"></i>
         </div>
     </header>
     
     <div class="video-container">
-        <video id="video-player" controls>
-            <source id="video-source" src="" type="video/mp4">
-            <source id="video-source-ogg" src="" type="video/ogg">
-            <source id="video-source-webm" src="" type="video/webm">
-            Your browser does not support the video tag.
-        </video>
+        <div class="video-wrapper">
+            <video id="video-player">
+                <source id="video-source" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="center-play">
+                <i class="fas fa-play"></i>
+            </div>
+            <div class="custom-controls">
+                <button class="control-button" onclick="togglePlay()">
+                    <i class="fas fa-play" id="play-icon"></i>
+                </button>
+                <button class="control-button" onclick="toggleMute()">
+                    <i class="fas fa-volume-up" id="volume-icon"></i>
+                </button>
+                <input type="range" class="volume-slider" id="volumeControl" min="0" max="1" step="0.1" value="1">
+                <button class="control-button" onclick="togglePiP()">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button class="control-button" onclick="toggleAudioMode()">
+                    <i class="fas fa-headphones"></i>
+                </button>
+                <button class="control-button" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('all')">
+                <i class="fas fa-list"></i> All
+            </button>
+            <button class="tab" onclick="showTab('categories')">
+                <i class="fas fa-tags"></i> Categories
+            </button>
+            <button class="tab" onclick="showTab('favorites')">
+                <i class="fas fa-star"></i> Favorites
+            </button>
+        </div>
     </div>
     
     <div class="channel-container" id="channel-list"></div>
 
-    <!-- Settings Modal -->
     <div class="settings-modal" id="settingsModal">
         <div class="settings-content">
             <span class="close-button" onclick="toggleSettings()">×</span>
             <h3>Settings</h3>
             <label class="settings-label">Volume:</label>
-            <input type="range" id="volumeControl" min="0" max="1" step="0.1" value="1" onchange="changeVolume(this.value)">
+            <input type="range" id="settingsVolumeControl" min="0" max="1" step="0.1" value="1">
             <label class="settings-label">Playback Quality:</label>
-            <select id="qualitySelect" onchange="changeQuality(this.value)">
+            <select id="qualitySelect">
                 <option value="720p">720p</option>
                 <option value="480p">480p</option>
                 <option value="360p">360p</option>
             </select>
-            <button onclick="clearFavorites()">Clear Favorites</button>
+            <button onclick="clearFavorites()">
+                <i class="fas fa-trash"></i> Clear Favorites
+            </button>
             <h4>Favorite Channels</h4>
             <div id="favorite-channels"></div>
         </div>
     </div>
 
     <script>
+        const video = document.getElementById('video-player');
+        const playIcon = document.getElementById('play-icon');
+        const volumeIcon = document.getElementById('volume-icon');
+        let currentTab = 'all';
+        const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+        
+        // Load channels from M3U
         const urlParams = new URLSearchParams(window.location.search);
         const m3uLink = urlParams.get('m3u');
-        const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
         if (m3uLink) {
             fetch(m3uLink)
@@ -189,17 +307,26 @@
         function parseM3U(data) {
             const lines = data.split('\n');
             const channels = [];
+            let currentCategory = '';
+            
             for (let i = 0; i < lines.length; i++) {
                 if (lines[i].startsWith('#EXTINF:')) {
                     const channelInfo = lines[i].split(',');
                     const channelName = channelInfo[1].trim();
                     const channelUrl = lines[i + 1].trim();
                     
-                    // Extract logo URL if present in the line
                     const logoMatch = channelInfo[0].match(/tvg-logo="([^"]+)"/);
-                    const logoUrl = logoMatch ? logoMatch[1] : 'https://via.placeholder.com/50'; // Fallback logo
+                    const categoryMatch = channelInfo[0].match(/group-title="([^"]+)"/);
+                    
+                    const logoUrl = logoMatch ? logoMatch[1] : 'https://via.placeholder.com/50';
+                    const category = categoryMatch ? categoryMatch[1] : 'Uncategorized';
 
-                    channels.push({ name: channelName, url: channelUrl, logo: logoUrl });
+                    channels.push({
+                        name: channelName,
+                        url: channelUrl,
+                        logo: logoUrl,
+                        category: category
+                    });
                 }
             }
             return channels;
@@ -207,85 +334,271 @@
 
         function loadChannels(channels) {
             const channelList = document.getElementById('channel-list');
-            channelList.innerHTML = ''; // Clear previous channels
+            channelList.innerHTML = '';
+
+            let filteredChannels = channels;
+            if (currentTab === 'favorites') {
+                filteredChannels = channels.filter(channel => favorites.includes(channel.name));
+            } else if (currentTab === 'categories') {
+                // Group channels by category
+                const categories = {};
+                channels.forEach(channel => {
+                    if (!categories[channel.category]) {
+                        categories[channel.category] = [];
+                    }
+                    categories[channel.category].push(channel);
+                });
+
+                // Create category sections
+                Object.entries(categories).forEach(([category, categoryChannels]) => {
+                    const categorySection = document.createElement('div');
+                    categorySection.innerHTML = `<h3>${category}</h3>`;
+                    categorySection.appendChild(createChannelList(categoryChannels));
+                    channelList.appendChild(categorySection);
+                });
+                return;
+            }
+
+            channelList.appendChild(createChannelList(filteredChannels));
+        }
+
+        function createChannelList(channels) {
+            const fragment = document.createDocumentFragment();
             channels.forEach(channel => {
                 const channelItem = document.createElement('div');
                 channelItem.className = 'channel-item';
+                channelItem.innerHTML = `
+                    <img src="${channel.logo}" alt="${channel.name}" class="channel-logo">
+                    <div class="channel-name">${channel.name}</div>
+                    <div class="favorite-icon">
+                        <i class="fa${favorites.includes(channel.name) ? 's' : 'r'} fa-star"></i>
+                    </div>
+                `;
 
-                const channelLogo = document.createElement('img');
-                channelLogo.src = channel.logo;
-                channelLogo.alt = channel.name;
-                channelLogo.className = 'channel-logo';
-
-                const channelName = document.createElement('div');
-                channelName.className = 'channel-name';
-                channelName.textContent = channel.name;
-
-                const favoriteIcon = document.createElement('span');
-                favoriteIcon.className = 'favorite-icon';
-                favoriteIcon.textContent = favorites.includes(channel.name) ? '★' : '☆'; // Show filled or empty star
-                favoriteIcon.onclick = (event) => {
-                    event.stopPropagation(); // Prevent the click from bubbling up
+                channelItem.querySelector('.favorite-icon').onclick = (event) => {
+                    event.stopPropagation();
                     toggleFavorite(channel.name);
-                    favoriteIcon.textContent = favorites.includes(channel.name) ? '★' : '☆'; // Update icon
                 };
 
-                channelItem.appendChild(channelLogo);
-                channelItem.appendChild(channelName);
-                channelItem.appendChild(favoriteIcon);
                 channelItem.onclick = () => {
-                    const videoSource = document.getElementById('video-source');
-                    videoSource.src = channel.url;
-                    document.getElementById('video-player').load();
-                    document.getElementById('video-player').play();
+                    loadVideo(channel.url);
                 };
-                channelList.appendChild(channelItem);
+
+                fragment.appendChild(channelItem);
             });
+            return fragment;
+        }
+
+        function loadVideo(url) {
+            const videoSource = document.getElementById('video-source');
+            videoSource.src = url;
+            video.load();
+            video.play();
+        }
+
+        // Video Control Functions
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playIcon.className = 'fas fa-pause';
+            } else {
+                video.pause();
+                playIcon.className = 'fas fa-play';
+            }
+        }
+
+        function toggleMute() {
+            video.muted = !video.muted;
+            volumeIcon.className = video.muted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        }
+
+        async function togglePiP() {
+            try {
+                if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                } else {
+                    await video.requestPictureInPicture();
+                }
+            } catch (error) {
+                console.error('PiP failed:', error);
+            }
+        }
+
+        function toggleAudioMode() {
+            video.classList.toggle('audio-only');
+            // Implementation for audio-only mode
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                video.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
         }
 
         function toggleFavorite(channelName) {
-            if (favorites.includes(channelName)) {
-                favorites.splice(favorites.indexOf(channelName), 1); // Remove from favorites
+            const index = favorites.indexOf(channelName);
+            if (index === -1) {
+                favorites.push(channelName);
             } else {
-                favorites.push(channelName); // Add to favorites
+                favorites.splice(index, 1);
             }
-            localStorage.setItem('favorites', JSON.stringify(favorites)); // Save to localStorage
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+            loadChannels(window.channels); // Reload channels to update UI
+        }
+
+        function showTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.toggle('active', t.textContent.toLowerCase().includes(tab));
+            });
+            loadChannels(window.channels);
         }
 
         function toggleSettings() {
             const modal = document.getElementById('settingsModal');
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-            if (modal.style.display === 'flex') {
-                modal.style.justifyContent = 'center';
-                modal.style.alignItems = 'center';
-                loadFavoriteChannels(); // Load favorite channels when settings are opened
-            }
-        }
-
-        function loadFavoriteChannels() {
-            const favoriteChannelsContainer = document.getElementById('favorite-channels');
-            favoriteChannelsContainer.innerHTML = ''; // Clear previous favorites
-            favorites.forEach(channel => {
-                const channelItem = document.createElement('div');
-                channelItem.textContent = channel;
-                favoriteChannelsContainer.appendChild(channelItem);
-            });
-        }
-
-        function changeVolume(value) {
-            const videoPlayer = document.getElementById('video-player');
-            videoPlayer.volume = value; // Adjust volume based on the slider value
-        }
-
-        function changeQuality(value) {
-            alert(`Playback quality set to ${value}`); // Placeholder for quality change logic
         }
 
         function clearFavorites() {
             localStorage.removeItem('favorites');
-            alert('Favorites cleared successfully!');
-            loadFavoriteChannels(); // Refresh the displayed favorite channels
+            favorites.length = 0;
+            loadChannels(window.channels);
         }
+
+        // Volume control
+        document.getElementById('volumeControl').addEventListener('input', (e) => {
+            video.volume = e.target.value;
+        });
+
+        // Synchronize volume controls
+        document.getElementById('settingsVolumeControl').addEventListener('input', (e) => {
+            video.volume = e.target.value;
+            document.getElementById('volumeControl').value = e.target.value;
+        });
+
+        // Update volume control when video volume changes
+        video.addEventListener('volumechange', () => {
+            document.getElementById('volumeControl').value = video.volume;
+            document.getElementById('settingsVolumeControl').value = video.volume;
+            volumeIcon.className = video.volume === 0 ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+        });
+
+        // Video event listeners
+        video.addEventListener('play', () => {
+            playIcon.className = 'fas fa-pause';
+        });
+
+        video.addEventListener('pause', () => {
+            playIcon.className = 'fas fa-play';
+        });
+
+        // Quality change handler
+        document.getElementById('qualitySelect').addEventListener('change', (e) => {
+            const quality = e.target.value;
+            // Implementation for quality change
+            console.log(`Quality changed to ${quality}`);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            switch(e.key.toLowerCase()) {
+                case ' ':
+                case 'k':
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                case 'f':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'm':
+                    e.preventDefault();
+                    toggleMute();
+                    break;
+                case 'p':
+                    e.preventDefault();
+                    togglePiP();
+                    break;
+            }
+        });
+
+        // Hide controls when mouse is inactive
+        let controlsTimeout;
+        const customControls = document.querySelector('.custom-controls');
+        const centerPlay = document.querySelector('.center-play');
+
+        function hideControls() {
+            customControls.style.opacity = '0';
+            centerPlay.style.opacity = '0';
+        }
+
+        function showControls() {
+            customControls.style.opacity = '1';
+            centerPlay.style.opacity = '1';
+            clearTimeout(controlsTimeout);
+            controlsTimeout = setTimeout(hideControls, 3000);
+        }
+
+        video.addEventListener('mousemove', showControls);
+        video.addEventListener('mouseenter', showControls);
+        video.addEventListener('mouseleave', hideControls);
+
+        // Handle video errors
+        video.addEventListener('error', (e) => {
+            console.error('Video error:', e);
+            alert('Error playing video. Please try again or select another channel.');
+        });
+
+        // Save volume preference
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('volume', video.volume);
+        });
+
+        // Load saved volume on startup
+        window.addEventListener('load', () => {
+            const savedVolume = localStorage.getItem('volume');
+            if (savedVolume !== null) {
+                video.volume = savedVolume;
+                document.getElementById('volumeControl').value = savedVolume;
+                document.getElementById('settingsVolumeControl').value = savedVolume;
+            }
+        });
+
+        // Center play button click handler
+        centerPlay.addEventListener('click', togglePlay);
+
+        // Double click for fullscreen
+        video.addEventListener('dblclick', toggleFullscreen);
+
+        // Touch events for mobile
+        let touchTimeout;
+        video.addEventListener('touchstart', () => {
+            if (touchTimeout) {
+                clearTimeout(touchTimeout);
+                toggleFullscreen();
+            } else {
+                touchTimeout = setTimeout(() => {
+                    touchTimeout = null;
+                }, 300);
+                togglePlay();
+            }
+        });
+
+        // Update favorite channels in settings
+        function updateFavoritesList() {
+            const favoriteChannels = document.getElementById('favorite-channels');
+            favoriteChannels.innerHTML = '';
+            favorites.forEach(channelName => {
+                const channelDiv = document.createElement('div');
+                channelDiv.textContent = channelName;
+                favoriteChannels.appendChild(channelDiv);
+            });
+        }
+
+        // Call updateFavoritesList when settings modal is opened
+        document.querySelector('.icon').addEventListener('click', updateFavoritesList);
     </script>
 </body>
 </html>
